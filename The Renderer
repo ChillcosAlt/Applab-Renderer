@@ -1,0 +1,207 @@
+function sigmoid(x){
+  return 1/ (1 +  Math.pow(2.718,-(x))); 
+}
+var verts = {
+  0:  -0.5,
+  1:  -0.5,
+  2:  -0.5,
+  
+  3:  0.5,
+  4:  -0.5,
+  5:  -0.5,
+  
+  6:  0.5,
+  7:  -0.5,
+  8:  0.5,
+  
+  9:   -0.5,
+  10:  -0.5,
+  11:  0.5,
+  
+  12:  -0.5,
+  13:  0.5,
+  14:  -0.5,
+  
+  15:  0.5,
+  16:  0.5,
+  17:  -0.5,
+  
+  18:  0.5,
+  19:  0.5,
+  20:  0.5,
+  
+  21:  -0.5,
+  22:  0.5,
+  23:  0.5,
+  
+};
+var edges = {
+  0: 0,
+  1: 1,
+  2: 1,
+  3: 2,
+  4: 2,
+  5: 3,
+  6: 3,
+  7: 0,
+  8: 0,
+  9: 4,
+  10: 4,
+  11: 5,
+  12: 5,
+  13: 6,
+  14: 6,
+  15: 7,
+  16: 7,
+  17: 4,
+  18: 7,
+  19: 3,
+  20: 1,
+  21: 5,
+  22: 2,
+  23: 6,
+  24: 6,
+  25: 2
+};
+var transform = {};
+var projSpc = {};
+var screenSpc = {};
+createCanvas("screen", 320, 320);
+var clipPlane = 0.1;
+var FOV = 0.1;
+var camPos = {0:0,1:-1};
+function gc(){
+  clearCanvas();
+  
+  rect(0, 0, 320, 320);
+  var x;
+  var y;
+  var z;
+  var i = 0;
+  var d = 0;
+  //transform verts, linearly and angularly around cam transform
+  for (i; i < 8; i++)
+  {
+    for (d; d < 3; d++)
+    {
+      if (d == 0)
+      {
+        x = verts[i*3 + d];
+      }
+      if (d == 1)
+      {
+        y = verts[i*3 + d];
+      }
+      if (d == 2)
+      {
+        z = verts[i*3 + d];
+      }
+    }
+    d = 0 ;
+    x += -camPos[0]; 
+    
+    z += -camPos[1];
+    var deg = (getProperty("rotSlider","value")-50)/50;
+    z = z * Math.cos(deg)+(-x)*Math.sin(deg);
+    x = x * Math.cos(deg)+z*Math.sin(deg);
+    
+    FOV =  0.1 -(getProperty("fovSlider","value")-100)/100;
+    transform[i*3] = x;
+    transform[i*3+1] = y;
+    transform[i*3+2] = z;
+  }
+  i = 0;
+  //convert to projection space
+
+  //convert to screen space
+  for (i; i < 8; i++)
+  {
+    
+    for (d; d < 3; d++)
+    {
+      if (d == 0)
+      {
+        x = transform[i*3 + d];
+      }
+      if (d == 1)
+      {
+        y = transform[i*3 + d];
+      }
+      if (d == 2)
+      {
+        z = transform[i*3 + d];
+      }
+    }
+    d = 0;
+    
+    if (z <=clipPlane)
+    {
+      screenSpc[i*2] = null;
+      screenSpc[i*2+1] = null;
+    }
+    else
+    {
+      var clipPos = (clipPlane/z);
+      x = x*clipPos;
+      y = y*clipPos;
+      var xfac = 0.5 + (x/FOV)/2;
+      var yfac = 0.5 + (y/FOV)/2;
+      screenSpc[i*2] = 320*xfac;
+      screenSpc[i*2+1] = 320*yfac;
+    }
+   
+    
+    //console.log(320*xfac);
+    //console.log(320*yfac);
+    //circle(320*xfac, 320*yfac, 10);
+    
+  }
+  i = 0;
+  
+  for (i; i < 12; i++)
+  {
+    var x1 = screenSpc[edges[i*2]*2];
+    var y1 = screenSpc[edges[i*2]*2+1];
+    var x2 = screenSpc[edges[i*2+1]*2];
+    var y2 = screenSpc[edges[i*2+1]*2+1];
+    if (x1!=null && y1!=null&&x2!=null&&y2!=null)
+    {
+      //circle(x1, y1, 10);
+      line(x1,y1,x2,y2);
+    }
+    
+  }
+  i = null;
+  d = null;
+  x = null;
+  y = null;
+  z = null;
+}
+timedLoop(100, function() {
+  
+    gc();
+  
+  
+  
+});
+onEvent("screen1", "keypress",function(event){
+  //console.clear();
+  //console.log(event.key);
+  if (event.key == "w")
+  {
+    camPos[1] += 0.1;
+  }
+  if (event.key == "s")
+  {
+    camPos[1] += -0.1;
+  }
+  if (event.key == "a")
+  {
+    camPos[0] += -0.1;
+  }
+  if (event.key == "d")
+  {
+    camPos[0] += 0.1;
+  }
+});
+
