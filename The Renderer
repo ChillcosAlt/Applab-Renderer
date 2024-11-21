@@ -1,129 +1,250 @@
-var verts = {
-  0:  -0.5,
-  1:  -0.5,
-  2:  -0.5,
+function clamp(val, min, max)
+{
+  if (val > max)
+  {
+    return max;
+  }
+  else if (val < min)
+  {
+    return min;
+  }
+  else
+  {
+    return val;
+  }
+}
+function rotate(vector, eulerlist)
+{
+  var tempverts = vector;
+  var tempverts2 = [];
+  for (var f = 0; f < 3; f++)
+    {
+      var deg = eulerlist[f];
+      
+      for (var j = 0; j < 3; j++)
+      {
+        var finalval = 0;
+        for (var l = 0; l < 3; l++)
+        {
+          var val = matrices[f][j*3+l];
+          
+          if (Math.abs(val) == 2)
+          {
+            finalval += tempverts[l]*(Math.sin(deg)*(val/2));
+          }
+          else if (Math.abs(val) == 3)
+          {
+            finalval += tempverts[l]*(Math.cos(deg)*(val/3));
+          }
+          else
+          {
+            finalval += tempverts[l]*val;
+          }
+        }
+        tempverts2[j] = finalval;
+      }
+      tempverts[0] = tempverts2[0];
+      tempverts[1] = tempverts2[1];
+      tempverts[2] = tempverts2[2];
+      
+      
+      
+    }
+    return tempverts;
+}
+function dot(vector1, vector2) {
+  var result = 0;
+  for (var i = 0; i < vector1.length; i++) {
+    result += vector1[i] * vector2[i];
+  }
+  return result;
+}
+function normalize(vector)
+{
+  var total = Math.abs(vector[0])+Math.abs(vector[1])+Math.abs(vector[2]);
+  var fac = 1/total;
+  return [vector[0]*fac,vector[1]*fac,vector[2]*fac];
   
-  3:  0.5,
-  4:  -0.5,
-  5:  -0.5,
+}
+var verts = [
+    -0.5,
+    -0.5,
+    -0.5,
   
-  6:  0.5,
-  7:  -0.5,
-  8:  0.5,
+    0.5,
+    -0.5,
+    -0.5,
   
-  9:   -0.5,
-  10:  -0.5,
-  11:  0.5,
+    0.5,
+    -0.5,
+    0.5,
   
-  12:  -0.5,
-  13:  0.5,
-  14:  -0.5,
+     -0.5,
+    -0.5,
+    0.5,
   
-  15:  0.5,
-  16:  0.5,
-  17:  -0.5,
+    -0.5,
+    0.5,
+    -0.5,
   
-  18:  0.5,
-  19:  0.5,
-  20:  0.5,
+    0.5,
+    0.5,
+    -0.5,
   
-  21:  -0.5,
-  22:  0.5,
-  23:  0.5,
+    0.5,
+    0.5,
+    0.5,
   
-};
-var edges = {
-  0: 0,
-  1: 1,
-  2: 1,
-  3: 2,
-  4: 2,
-  5: 3,
-  6: 3,
-  7: 0,
-  8: 0,
-  9: 4,
-  10: 4,
-  11: 5,
-  12: 5,
-  13: 6,
-  14: 6,
-  15: 7,
-  16: 7,
-  17: 4,
-  18: 7,
-  19: 3,
-  20: 1,
-  21: 5,
-  22: 2,
-  23: 6,
-  24: 6,
-  25: 2
-};
-var rotMatrixX = {
-  0: 1,
-  1: 0,
-  2: 0,
-  3: 0,
-  4: 3,
-  5: -2,
-  6: 0,
-  7: 2,
-  8: 3
-};
-var rotMatrixY = {
-  0: 3,
-  1: 0,
-  2: 2,
-  3: 0,
-  4: 1,
-  5: 0,
-  6: -2,
-  7: 0,
-  8: 3
-};
-var rotMatrixZ = {
-  0: 3,
-  1: -2,
-  2: 0,
-  3: 2,
-  4: 3,
-  5: 0,
-  6: 0,
-  7: 0,
-  8: 1
-};
-var matrices = {
-  0:rotMatrixY,
-  1:rotMatrixX,
-  2:rotMatrixZ
-};
-var transform = {};
-var screenSpc = {};
+    -0.5,
+    0.5,
+    0.5,
+  
+];
+var edges = [
+   0,1,
+   1,2,
+   2,3,
+   3,0,
+   0,4,
+   4,5,
+   5,6,
+   6,7,
+   7,4,
+   7,3,
+   1,5,
+   2,6,
+   6,2
+];
+var normals = [
+   [
+     [-1,0,0],
+     [0,-1,0],
+     [0,0,-1],
+    ],
+   [
+     [1,0,0],
+     [0,-1,0],
+     [0,0,-1],
+   ],
+   [
+     [1,0,0],
+     [0,-1,0],
+     [0,0,1],
+   ],
+   [
+     [-1,0,0],
+     [0,-1,0],
+     [0,0,1],
+   ],
+   [
+     [-1,0,0],
+     [0,1,0],
+     [0,0,-1],
+   ],
+   [
+     [1,0,0],
+     [0,1,0],
+     [0,0,-1],
+   ],
+   [
+     [1,0,0],
+     [0,1,0],
+     [0,0,1],
+   ],
+   [
+     [-1,0,0],
+     [0,1,0],
+     [0,0,1],
+   ],
+];
+var rotMatrixX = [
+  1,0,0,
+  0,3,-2,
+  0,2,3
+];
+var rotMatrixY = [
+  3,0,2,
+  0,1,0,
+  -2,0,3
+];
+var rotMatrixZ = [
+  3,-2,0,
+  2,3,0,
+  0,0,1
+];
+var matrices = [
+  rotMatrixY,
+  rotMatrixX,
+  rotMatrixZ
+];
+var screenSpc = [];
 createCanvas("screen", 320, 320);
 var clipPlane = 0.1;
 var FOV = 0.1;
-var camPos = {0:0,1:-1};
-var euler = {0:0,1:0,2:0};
+var camPos = [0,-1];
+var euler = [0,0,0];
 var x=0;
 var y=0;
 var z=0;
 var i = 0;
-var d = 0;
+
+
+//DEBUG: simply shows normals
+
+/*for (i;i<normals.length;i++)
+  {
+    for (var j=0;j<normals[i].length;j++)
+    {
+      
+      
+      for (d;d<3;d++)
+      {
+        console.log(verts[i*3+d] + normals[i][j][d]);
+        verts[verts.length]=verts[i*3+d] + normals[i][j][d]/4;
+        
+      }
+      edges[edges.length] = i;
+      edges[edges.length] = (verts.length)/3-1;
+      d = 0;
+    }
+  }
+i = 0;*/
+
+
 function gc(){
   x = 0;
   y = 0;
   z = 0;
-  i = 0;
-  d = 0;
-  //console.clear();
   
-  
-  var verts2 = {};
-  var verts3 = {};
-  //transform verts, linearly and angularly around cam transform
-  for (i; i < 8; i++)
+  screenSpc = [];
+  var verts2 = [];
+  var verts3 = [];
+  var camForward = rotate([0,0,1],[-euler[0],euler[1],euler[2]]);
+  camForward = [-camForward[0],-camForward[1],-camForward[2]];
+  console.clear();
+//transform verts, linearly and angularly around cam transform
+  for (var i = 0; i < verts.length/3; i++)
   {
+    
+    var cullPass = false;
+    
+    var ray = [verts[i*3]-camPos[0],verts[i*3+1],verts[i*3+2]-camPos[1]];
+    ray = normalize(ray);
+    ray = [-ray[0],-ray[1],-ray[2]];
+    for (var d = 0;d<normals[i].length;d++)
+    {
+      
+      console.log(dot(normals[i][d],ray));
+      if(dot(normals[i][d],ray) >0)
+      {
+        cullPass = true;
+        break;
+      }
+    }
+    console.log(ray);
+    if(cullPass == true)
+    {
+    d=0;
     for (d; d < 3; d++)
     {
         verts2[d] = verts[i*3 + d];
@@ -137,39 +258,7 @@ function gc(){
     verts3[0] += -camPos[0]; //* Math.cos(deg)+camPos[1]*Math.sin(deg); 
     
     verts3[2] += -camPos[1]; //* Math.cos(deg)+-camPos[0]*Math.sin(deg);
-    for (var f = 0; f < 3; f++)
-    {
-      var deg = euler[f];
-      
-      for (var j = 0; j < 3; j++)
-      {
-        var finalval = 0;
-        for (var l = 0; l < 3; l++)
-        {
-          var val = matrices[f][j*3+l];
-          
-          if (Math.abs(val) == 2)
-          {
-            finalval += verts3[l]*(Math.sin(deg)*(val/2));
-          }
-          else if (Math.abs(val) == 3)
-          {
-            finalval += verts3[l]*(Math.cos(deg)*(val/3));
-          }
-          else
-          {
-            finalval += verts3[l]*val;
-          }
-        }
-        verts2[j] = finalval;
-      }
-      verts3[0] = verts2[0];
-      verts3[1] = verts2[1];
-      verts3[2] = verts2[2];
-      
-      
-      
-    }
+    verts2 = rotate(verts3, euler); 
     
     //console.log(verts2);
     
@@ -194,7 +283,13 @@ function gc(){
       screenSpc[i*2] = 320*xfac;
       screenSpc[i*2+1] = 320*yfac;
     }
-    
+    }
+    //statement for if it is culled
+    else
+    {
+      screenSpc[i*2] = null;
+      screenSpc[i*2+1] = null;
+    }
   }
   i = 0;
   
@@ -204,68 +299,107 @@ function render()
 {
   clearCanvas();
   rect(0, 0, 320, 320);
-  for (i; i < 12; i++)
+  i = 0;
+  for (i; i < screenSpc.length; i++)
   {
+    
+    
     var x1 = screenSpc[edges[i*2]*2];
     var y1 = screenSpc[edges[i*2]*2+1];
     var x2 = screenSpc[edges[i*2+1]*2];
     var y2 = screenSpc[edges[i*2+1]*2+1];
     if (x1!=null && y1!=null&&x2!=null&&y2!=null)
     {
+      //console.log("rendered");
       //circle(x1, y1, 10);
       line(x1,y1,x2,y2);
     }
     
   }
+  
 }
+var forward=0;
+var right=0;
+var yspd = 0;
+var xspd = 0;
+var walkspeed = 0.1;
 timedLoop(100, function() {
   
     gc();
     render();
-  
-  
+    camPos[0] += right*Math.cos(-euler[0])+forward*Math.sin(-euler[0]);
+    camPos[1] += forward*Math.cos(-euler[0])-right*Math.sin(-euler[0]);
+    euler[0]+=yspd;
+    euler[1]+=xspd;
 });
 
-onEvent("screen1", "keypress",function(event){
-  //console.clear();
-  //console.log(event.key);
-  var deg = (getProperty("rotSlider2","value")-50)/25;
-  var forward=0;
-  var right=0;
-  if (event.key == "w")
+onEvent("screen1", "keyup",function(event){
+  switch(event.key)
   {
-    forward+=0.1;
+    case "w":
+      forward-=walkspeed;
+      break;
+    case "s":
+      forward+=walkspeed;
+      break;
+    case "a":
+      right+=walkspeed;
+      break;
+    case "d":
+      right-=walkspeed;
+      break;
   }
-  if (event.key == "s")
+  forward = clamp(forward,-walkspeed,walkspeed);
+  right = clamp(right,-walkspeed,walkspeed);
+  switch(event.key)
   {
-    forward-=0.1;
+    case "j":
+      yspd-=0.1;
+      break;
+    case "l":
+      yspd+=0.1;
+      break;
+    case "k":
+      xspd-=0.1;
+      break;
+    case "i":
+      xspd+=0.1;
   }
-  if (event.key == "a")
+  yspd = clamp(yspd,-0.1,0.1);
+  xspd = clamp(xspd,-0.1,0.1);
+});
+onEvent("screen1", "keydown",function(event){
+  switch(event.key)
   {
-    right-=0.1;
+    case "w":
+      forward+=walkspeed;
+      break;
+    case "s":
+      forward-=walkspeed;
+      break;
+    case "a":
+      right-=walkspeed;
+      break;
+    case "d":
+      right+=walkspeed;
   }
-  if (event.key == "d")
+  forward = clamp(forward,-walkspeed,walkspeed);
+  right = clamp(right,-walkspeed,walkspeed);
+  switch(event.key)
   {
-    right+=0.1;
+    case "j":
+      yspd+=0.1;
+      break;
+    case "l":
+      yspd-=0.1;
+      break;
+    case "k":
+      xspd+=0.1;
+      break;
+    case "i":
+      xspd-=0.1;
   }
-  
-  if (event.key == "j")
-  {
-    euler[0] +=0.1;
-  }
-  if (event.key == "l")
-  {
-    euler[0] +=-0.1;
-  }
-  if (event.key == "k")
-  {
-    euler[1] +=0.1;
-  }
-  if (event.key == "i")
-  {
-    euler[1] -=0.1;
-  }
-  camPos[0] += right*Math.cos(-euler[0])+forward*Math.sin(-euler[0]);
-  camPos[1] += forward*Math.cos(-euler[0])-right*Math.sin(-euler[0]);
+  yspd = clamp(yspd,-0.1,0.1);
+  xspd = clamp(xspd,-0.1,0.1);
 });
 
